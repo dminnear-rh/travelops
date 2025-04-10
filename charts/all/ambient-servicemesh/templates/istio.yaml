@@ -5,7 +5,7 @@ metadata:
 spec:
   version: v1.24.3
   namespace: istio-system
-  profile: ambient
+  profile: openshift-ambient
   values:
     pilot:
       trustedZtunnelNamespace: istio-system
@@ -19,12 +19,3 @@ spec:
       defaultProviders:
         tracing:
           - otel
-    gateways:
-      istio-ingressgateway:
-        type: LoadBalancer
-        labels:
-          istio: ingressgateway
-        enabled: true
-    components:
-      ambient:
-        enabled: true
