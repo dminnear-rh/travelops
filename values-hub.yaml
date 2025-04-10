@@ -8,13 +8,16 @@ clusterGroup:
     - golang-external-secrets
     - travel-agency:
         labels:
-          istio.io/dataplane-mode: ambient
+          istio-discovery: enabled
+          istio.io/rev: default
     - travel-portal:
         labels:
-          istio.io/dataplane-mode: ambient
+          istio-discovery: enabled
+          istio.io/rev: default
     - travel-control:
         labels:
-          istio.io/dataplane-mode: ambient
+          istio-discovery: enabled
+          istio.io/rev: default
     - istio-system
     - openshift-tempo-operator:
         labels:

@@ -5,10 +5,7 @@ metadata:
 spec:
   version: v1.24.3
   namespace: istio-system
-  profile: openshift-ambient
   values:
-    pilot:
-      trustedZtunnelNamespace: istio-system
     meshConfig:
       enableTracing: true
       extensionProviders:
@@ -19,3 +16,6 @@ spec:
       defaultProviders:
         tracing:
           - otel
+      discoverySelectors:
+        - matchLabels:
+            istio-discovery: enabled
