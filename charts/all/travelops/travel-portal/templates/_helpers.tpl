@@ -93,18 +93,26 @@ for app in travels voyages viaggi; do
   echo "🔍 Checking rollout status for ${app} in namespace ${NS}..."
 
   while true; do
-    PODS=$(oc get pods -n "${NS}" -l app="${app}" --no-headers)
+    PODS=$(oc get pods -n "${NS}" -l app="${app}" --no-headers || true)
+
+    if [[ -z "$PODS" ]]; then
+      echo "❗ No pods found for app=${app} in namespace ${NS}. Retrying in 10s..."
+      sleep 10
+      continue
+    fi
 
     TOTAL=$(echo "$PODS" | wc -l)
     READY=$(echo "$PODS" | awk '$2 == $2' | grep -E '1/1|2/2' | wc -l)
     SIDECAR_COUNT=0
 
-    # Count pods with the istio-proxy container (no jq version)
     for POD in $(echo "$PODS" | awk '{print $1}'); do
-      if oc get pod "$POD" -n "${NS}" -o jsonpath='{.spec.containers[*].name}' | grep -q "istio-proxy"; then
+      CONTAINERS=$(oc get pod "$POD" -n "${NS}" -o jsonpath='{.spec.containers[*].name}' || true)
+      if echo "$CONTAINERS" | grep -q "istio-proxy"; then
         ((SIDECAR_COUNT++))
       fi
     done
+
+    echo "📊 Total=$TOTAL, Ready=$READY, Sidecars=$SIDECAR_COUNT"
 
     if [[ "$TOTAL" -gt 0 && "$TOTAL" -eq "$READY" && "$TOTAL" -eq "$SIDECAR_COUNT" ]]; then
       echo "✅ ${app} is fully rolled out with sidecars."
