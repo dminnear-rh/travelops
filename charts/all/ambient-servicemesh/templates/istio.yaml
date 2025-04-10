@@ -19,3 +19,9 @@ spec:
       defaultProviders:
         tracing:
           - otel
+    gateways:
+      istio-ingressgateway:
+        type: LoadBalancer
+        labels:
+          istio: ingressgateway
+        enabled: true
