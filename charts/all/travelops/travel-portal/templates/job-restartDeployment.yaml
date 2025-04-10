@@ -3,7 +3,7 @@ kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: '50'
-    sidecar.istio.io/inject: false
+    sidecar.istio.io/inject: "false"
   name: rollout-restart
   namespace: travel-portal
 spec:
