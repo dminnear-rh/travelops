@@ -3,22 +3,24 @@ kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: '50'
-    sidecar.istio.io/inject: "false"
   name: rollout-restart
   namespace: travel-portal
 spec:
   template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       containers:
-      - image: {{ .Values.job.image }}
-        name: rollout-restart
-        command:
-          - /bin/bash
-          - '/usr/local/bin/rollout-restart.sh'
-        volumeMounts:
-        - mountPath: /usr/local/bin/rollout-restart.sh
+        - image: {{ .Values.job.image }}
           name: rollout-restart
-          subPath: rollout-restart.sh
+          command:
+            - /bin/bash
+            - '/usr/local/bin/rollout-restart.sh'
+          volumeMounts:
+            - mountPath: /usr/local/bin/rollout-restart.sh
+              name: rollout-restart
+              subPath: rollout-restart.sh
       volumes:
         - name: rollout-restart
           configMap:
