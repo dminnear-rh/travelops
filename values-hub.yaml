@@ -18,7 +18,9 @@ clusterGroup:
         labels:
           istio-discovery: enabled
           istio.io/rev: default
-    - istio-system
+    - istio-system:
+        labels:
+          istio-discovery: enabled
     - openshift-tempo-operator:
         labels:
           openshift.io/cluster-monitoring: true
