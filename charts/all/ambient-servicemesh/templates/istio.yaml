@@ -25,3 +25,6 @@ spec:
         labels:
           istio: ingressgateway
         enabled: true
+    components:
+      ambient:
+        enabled: true
