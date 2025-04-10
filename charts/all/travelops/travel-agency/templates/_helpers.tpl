@@ -83,7 +83,7 @@ proxy.istio.io/config: |
 #!/bin/bash
 
 NS="travel-agency"
-DEPLOYMENTS=("cars-v1" "discounts-v1" "flights-v1" "hotels-v1" "insurances-v1" "mysqldb-v1" "travels-v1")
+DEPLOYMENTS=("cars-v1" "discounts-v1" "flights-v1" "hotels-v1" "insurances-v1" "travels-v1")
 
 echo "🔄 Restarting all deployments in $NS to trigger sidecar injection..."
 
