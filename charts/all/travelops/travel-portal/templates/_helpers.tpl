@@ -88,25 +88,22 @@ proxy.istio.io/config: |
 NS="travel-portal"
 DEPLOYMENTS=("travels" "travels-v1" "voyages" "voyages-v1" "viaggi" "viaggi-v1")
 
+echo "🔄 Restarting all deployments to trigger sidecar injection..."
+
 for deploy in "${DEPLOYMENTS[@]}"; do
-  echo "🔍 Checking rollout status for ${deploy} in namespace ${NS}..."
+  oc rollout restart deployment "$deploy" -n "$NS"
+done
+
+echo "⏳ Waiting for pods to be ready and injected..."
+
+for deploy in "${DEPLOYMENTS[@]}"; do
+  echo "🔍 Verifying rollout and injection for $deploy..."
 
   while true; do
-    PODS=$(oc get pods -n "${NS}" --no-headers | awk '{print $1}')
-    MATCHING_PODS=()
+    PODS=$(oc get pods -n "$NS" -l app="${deploy%%-v1}" --no-headers | grep "$deploy" || true)
 
-    for pod in $PODS; do
-      # Get the owning ReplicaSet of the pod
-      OWNER=$(oc get pod "$pod" -n "${NS}" -o jsonpath='{.metadata.ownerReferences[0].name}' 2>/dev/null || echo "")
-
-      # If the ReplicaSet name starts with the deployment name, include it
-      if [[ "$OWNER" == "$deploy"* ]]; then
-        MATCHING_PODS+=("$pod")
-      fi
-    done
-
-    if [[ "${#MATCHING_PODS[@]}" -eq 0 ]]; then
-      echo "❗ No pods owned by $deploy found. Waiting..."
+    if [[ -z "$PODS" ]]; then
+      echo "❗ No pods found for $deploy yet. Waiting..."
       sleep 10
       continue
     fi
@@ -115,17 +112,17 @@ for deploy in "${DEPLOYMENTS[@]}"; do
     READY=0
     SIDECAR=0
 
-    for pod in "${MATCHING_PODS[@]}"; do
+    for pod in $(echo "$PODS" | awk '{print $1}'); do
       ((TOTAL++))
 
-      # Check if all containers in the pod are Ready
-      READY_CONTAINERS=$(oc get pod "$pod" -n "${NS}" -o jsonpath='{.status.containerStatuses[*].ready}' 2>/dev/null || echo "")
+      # Check Ready
+      READY_CONTAINERS=$(oc get pod "$pod" -n "$NS" -o jsonpath='{.status.containerStatuses[*].ready}' 2>/dev/null || echo "")
       if echo "$READY_CONTAINERS" | grep -q "true"; then
         ((READY++))
       fi
 
-      # Check for istio-proxy container
-      CONTAINERS=$(oc get pod "$pod" -n "${NS}" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null || echo "")
+      # Check istio-proxy
+      CONTAINERS=$(oc get pod "$pod" -n "$NS" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null || echo "")
       if echo "$CONTAINERS" | grep -q "istio-proxy"; then
         ((SIDECAR++))
       fi
@@ -134,16 +131,13 @@ for deploy in "${DEPLOYMENTS[@]}"; do
     echo "📊 $deploy: Total=$TOTAL, Ready=$READY, Sidecars=$SIDECAR"
 
     if [[ "$TOTAL" -gt 0 && "$TOTAL" -eq "$READY" && "$TOTAL" -eq "$SIDECAR" ]]; then
-      echo "✅ ${deploy} is fully rolled out with sidecars."
+      echo "✅ $deploy is fully rolled out with sidecars."
       break
-    else
-      echo "🔄 Restarting rollout for ${deploy} in ${NS}..."
-      oc patch deployment "${deploy}" -n "${NS}" \
-        -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"sidecar.istio.io/inject-ts\":\"$(date +%s)\"}}}}}" || true
-      sleep 15
     fi
+
+    sleep 10
   done
 done
 
-echo "🎉 All deployments in ${NS} are now injected and ready!"
+echo "🎉 All deployments restarted and verified with sidecar injection!"
 {{- end }}
