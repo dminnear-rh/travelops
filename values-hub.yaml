@@ -108,12 +108,6 @@ clusterGroup:
       chart: golang-external-secrets
       chartVersion: 0.1.*
 
-    mysql:
-      name: mysqldb
-      namespace: travel-agency
-      project: travelops
-      path: charts/all/travelops/mysqldb
-
     agency:
       name: travel-agency
       namespace: travel-agency
