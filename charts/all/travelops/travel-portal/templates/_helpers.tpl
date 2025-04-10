@@ -85,18 +85,16 @@ proxy.istio.io/config: |
 {{- define "travel-portal.rolloutRestart" }}
 #!/bin/bash
 
-set -euo pipefail
-
 NS="travel-portal"
 
 for app in travels voyages viaggi; do
   echo "🔍 Checking rollout status for ${app} in namespace ${NS}..."
 
   while true; do
-    PODS=$(oc get pods -n "${NS}" -l app="${app}" --no-headers || true)
+    PODS=$(oc get pods -n "${NS}" -l app="${app}" --no-headers 2>/dev/null)
 
     if [[ -z "$PODS" ]]; then
-      echo "❗ No pods found for app=${app} in namespace ${NS}. Retrying in 10s..."
+      echo "❗ No pods found for app=${app}. Waiting..."
       sleep 10
       continue
     fi
@@ -106,9 +104,9 @@ for app in travels voyages viaggi; do
     SIDECAR_COUNT=0
 
     for POD in $(echo "$PODS" | awk '{print $1}'); do
-      CONTAINERS=$(oc get pod "$POD" -n "${NS}" -o jsonpath='{.spec.containers[*].name}' || true)
+      CONTAINERS=$(oc get pod "$POD" -n "${NS}" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null)
       if echo "$CONTAINERS" | grep -q "istio-proxy"; then
-        ((SIDECAR_COUNT++))
+        SIDECAR_COUNT=$((SIDECAR_COUNT + 1))
       fi
     done
 
@@ -119,7 +117,7 @@ for app in travels voyages viaggi; do
       break
     else
       echo "🔄 Restarting rollout for ${app} in ${NS}..."
-      oc rollout restart deploy -l app="${app}" -n "${NS}"
+      oc rollout restart deploy -l app="${app}" -n "${NS}" || true
       sleep 15
     fi
   done
