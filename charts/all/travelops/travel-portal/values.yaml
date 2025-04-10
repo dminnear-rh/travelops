@@ -9,10 +9,10 @@ global:
     strategy:  production
 
 # Enable auto sidecar injection
-sidecarAutoInjection: true
+sidecarAutoInjection: false
 
 # Enable jaeger sidecar
-sidecarJaeger: true
+sidecarJaeger: false
 
 replicaCount: 1
 

@@ -9,10 +9,10 @@ global:
     strategy: production
 
 # Enable automatic sidecar injection
-sidecarAutoInjection: true
+sidecarAutoInjection: false
 
 # Enable jaeger sidecar
-sidecarJaeger: true
+sidecarJaeger: false
 
 # Add travelops namespaces to servicemesh:
 serviceMeshMemberNamespaces:

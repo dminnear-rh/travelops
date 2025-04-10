@@ -8,10 +8,10 @@ global:
     strategy: production
 
 # Enable Auto sidecar injection for travel apps
-sidecarAutoInjection: true
+sidecarAutoInjection: false
 
 # Enable jaeger sidecar
-sidecarJaeger: true
+sidecarJaeger: false
 
 replicaCount: 1
 
@@ -32,7 +32,7 @@ service:
   type: ClusterIP
   protocol: TCP
   port: 3306
-  targetPort: 
+  targetPort:
 
 # External Secrets Operator config
 secretStore:

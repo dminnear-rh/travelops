@@ -8,10 +8,10 @@ global:
     strategy: production
 
 # Enable Auto sidecar injection for travel apps
-sidecarAutoInjection: true
+sidecarAutoInjection: false
 
 # Enable jaeger sidecar
-sidecarJaeger: true
+sidecarJaeger: false
 
 replicaCount: 1
 
@@ -51,7 +51,7 @@ rbac:
       - get
       - list
       - watch
-    - apiGroups: 
+    - apiGroups:
       - apps
       resources:
       - deployments
