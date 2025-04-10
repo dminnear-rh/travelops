@@ -1,0 +1,17 @@
+{{- range .Values.apps }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ .name }}
+spec:
+  ports:
+  {{- with $svc := $.Values.service }}
+    - name: {{ $svc.name }}
+      port: {{ $svc.port }}
+  {{- end }}
+  selector:
+    app: {{ .name }}
+{{- end }}

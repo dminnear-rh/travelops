@@ -42,7 +42,7 @@ clusterGroup:
     servicemesh:
       name: servicemeshoperator3
 
-    ossmc:
+    servicemesh-console:
       name: kiali-ossm
 
     distributed-tracing:
@@ -59,7 +59,7 @@ clusterGroup:
 
   projects:
     - hub
-    - ambient-servicemesh
+    - servicemesh
     - travelops
 
   # Explicitly mention the cluster-state based overrides we plan to use for this pattern.
@@ -111,6 +111,12 @@ clusterGroup:
       chart: golang-external-secrets
       chartVersion: 0.1.*
 
+    mysql:
+      name: mysqldb
+      namespace: travel-agency
+      project: travelops
+      path: charts/all/travelops/mysqldb
+
     agency:
       name: travel-agency
       namespace: travel-agency
@@ -130,10 +136,10 @@ clusterGroup:
       path: charts/all/travelops/travel-control
 
     servicemesh:
-      name: ambient-servicemesh
+      name: servicemesh
       namespace: istio-system
-      project: ambient-servicemesh
-      path: charts/all/ambient-servicemesh
+      project: servicemesh
+      path: charts/all/servicemesh
 
   imperative:
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm

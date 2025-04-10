@@ -1,0 +1,57 @@
+# Default values for services.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global parameters for the jaeger resource
+global:
+  localClusterDomain: ''
+  jaeger:
+    strategy:  production
+
+# Enable auto sidecar injection
+sidecarAutoInjection: true
+
+# Enable jaeger sidecar
+sidecarJaeger: true
+
+replicaCount: 1
+
+image:
+  registry: quay.io
+  repository: kiali
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: v1
+
+service:
+  type: ClusterIP
+  port: 8000
+  name: http
+
+appVersion: v1
+
+job:
+  image: image-registry.openshift-image-registry.svc:5000/openshift/cli
+
+# Defining deployment environment variables for portal microservices. The env section for the
+# control application is empty by default to allow us to use `with` function. You may add additional
+# env vars if necessary, but ootb it is not required.
+apps:
+  - name: voyages
+    env:
+      coordinates: 48.861310,2.337418
+      country: France
+      countryShort: fr
+  - name: viaggi
+    env:
+      coordinates: 41.890668,12.492194
+      country: Italy
+      countryShort: it
+  - name: travels
+    env:
+      coordinates: 55.956245,-3.187915
+      country: United Kingdom
+      countryShort: uk
+
+rbac:
+  serviceAccountName: travelops-sa

@@ -1,0 +1,43 @@
+# Default values for mysqldb.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global parameters for the jaeger resource
+global:
+  jaeger:
+    strategy: production
+
+# Enable Auto sidecar injection for travel apps
+sidecarAutoInjection: true
+
+# Enable jaeger sidecar
+sidecarJaeger: true
+
+replicaCount: 1
+
+image:
+  registry: quay.io
+  repository: kiali/demo_travels_mysqldb
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: v1
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: mysqldb
+
+#by default the targetPort is undefined and its value matches the port. To override define the desired targetPort.
+service:
+  name: tcp
+  type: ClusterIP
+  protocol: TCP
+  port: 3306
+  targetPort: 
+
+# External Secrets Operator config
+secretStore:
+  name: vault-backend
+  kind: ClusterSecretStore
+
+mysqldbCredentials:
+  key: secret/data/global/mysql-credentials
