@@ -92,8 +92,8 @@ for deploy in "${DEPLOYMENTS[@]}"; do
   echo "🔍 Checking rollout status for ${deploy} in namespace ${NS}..."
 
   while true; do
-    # Only include pods owned by the specific deployment
-    PODS=$(oc get pods -n "${NS}" --no-headers | grep "${deploy}" || true)
+    # Get pods that are controlled by this deployment
+    PODS=$(oc get pods -n "${NS}" --selector=app=${deploy%%-v1} --no-headers | grep "${deploy}" || true)
 
     if [[ -z "$PODS" ]]; then
       echo "❗ No pods found for ${deploy}. Waiting..."
@@ -119,7 +119,9 @@ for deploy in "${DEPLOYMENTS[@]}"; do
       break
     else
       echo "🔄 Restarting rollout for ${deploy} in ${NS}..."
-      oc rollout restart deployment "${deploy}" -n "${NS}" || true
+      # Optionally use patch instead of rollout restart:
+      oc patch deployment "${deploy}" -n "${NS}" \
+        -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"sidecar.istio.io/inject-ts\":\"$(date +%s)\"}}}}}" || true
       sleep 15
     fi
   done
