@@ -6,16 +6,29 @@ clusterGroup:
     - open-cluster-management
     - vault
     - golang-external-secrets
-    - openshift-operators-redhat:
-        operatorGroup: true
-        targetNamespaces:
-    - openshift-distributed-tracing:
-        operatorGroup: true
-        targetNamespaces:
+    - travel-agency:
+        labels:
+          istio.io/dataplane-mode: ambient
+    - travel-portal:
+        labels:
+          istio.io/dataplane-mode: ambient
+    - travel-control:
+        labels:
+          istio.io/dataplane-mode: ambient
     - istio-system
-    - travel-agency
-    - travel-portal
-    - travel-control
+    - openshift-tempo-operator:
+        labels:
+          openshift.io/cluster-monitoring: true
+        operatorGroup: true
+        targetNamespaces:
+    - openshift-opentelemetry-operator:
+        operatorGroup: true
+        targetNamespaces:
+    - openshift-cluster-observability-operator:
+        labels:
+          openshift.io/cluster-monitoring: true
+        operatorGroup: true
+        targetNamespaces:
 
   subscriptions:
     acm:
@@ -23,26 +36,27 @@ clusterGroup:
       namespace: open-cluster-management
       channel: release-2.12
 
-    elasticsearch:
-      name: elasticsearch-operator
-      namespace: openshift-operators-redhat
-    
-    jaeger:
-      name: jaeger-product
-      namespace: openshift-distributed-tracing
-    
-    kiali:
-      name: kiali-ossm
-      namespace: openshift-operators
-      channel: stable
-    
     servicemesh:
-      name: servicemeshoperator
-      namespace: openshift-operators
-  
+      name: servicemeshoperator3
+
+    ossmc:
+      name: kiali-ossm
+
+    distributed-tracing:
+      name: tempo-product
+      namespace: openshift-tempo-operator
+
+    opentelemetry:
+      name: opentelemetry-product
+      namespace: openshift-opentelemetry-operator
+
+    cluster-observability:
+      name: cluster-observability-operator
+      namespace: openshift-cluster-observability-operator
+
   projects:
     - hub
-    - servicemesh
+    - ambient-servicemesh
     - travelops
 
   # Explicitly mention the cluster-state based overrides we plan to use for this pattern.
@@ -100,29 +114,29 @@ clusterGroup:
       project: travelops
       path: charts/all/travelops/mysqldb
 
-    servicemesh:
-      name: servicemesh-controlplane
-      namespace: istio-system
-      project: servicemesh
-      path: charts/all/servicemesh
-
-    agency: 
+    agency:
       name: travel-agency
       namespace: travel-agency
       project: travelops
       path: charts/all/travelops/travel-agency
-    
+
     portal:
       name: travel-portal
       namespace: travel-portal
       project: travelops
       path: charts/all/travelops/travel-portal
-    
+
     control:
       name: travel-control
       namespace: travel-control
       project: travelops
       path: charts/all/travelops/travel-control
+
+    servicemesh:
+      name: ambient-servicemesh
+      namespace: istio-system
+      project: ambient-servicemesh
+      path: charts/all/ambient-servicemesh
 
   imperative:
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm

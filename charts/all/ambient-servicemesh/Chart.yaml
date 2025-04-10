@@ -1,0 +1,4 @@
+apiVersion: v2
+description: A Helm chart to set up an Istio ambient ServiceMesh in OpenShift
+name: ambient-servicemesh
+version: 0.0.1
