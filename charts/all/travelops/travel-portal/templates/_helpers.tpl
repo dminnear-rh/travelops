@@ -92,34 +92,52 @@ for deploy in "${DEPLOYMENTS[@]}"; do
   echo "🔍 Checking rollout status for ${deploy} in namespace ${NS}..."
 
   while true; do
-    # Get pods that are controlled by this deployment
-    PODS=$(oc get pods -n "${NS}" --selector=app=${deploy%%-v1} --no-headers | grep "${deploy}" || true)
+    PODS=$(oc get pods -n "${NS}" --no-headers | awk '{print $1}')
+    MATCHING_PODS=()
 
-    if [[ -z "$PODS" ]]; then
-      echo "❗ No pods found for ${deploy}. Waiting..."
+    for pod in $PODS; do
+      # Get the owning ReplicaSet of the pod
+      OWNER=$(oc get pod "$pod" -n "${NS}" -o jsonpath='{.metadata.ownerReferences[0].name}' 2>/dev/null || echo "")
+
+      # If the ReplicaSet name starts with the deployment name, include it
+      if [[ "$OWNER" == "$deploy"* ]]; then
+        MATCHING_PODS+=("$pod")
+      fi
+    done
+
+    if [[ "${#MATCHING_PODS[@]}" -eq 0 ]]; then
+      echo "❗ No pods owned by $deploy found. Waiting..."
       sleep 10
       continue
     fi
 
-    TOTAL=$(echo "$PODS" | wc -l)
-    READY=$(echo "$PODS" | awk '$2 == $2' | grep -E '1/1|2/2' | wc -l)
-    SIDECAR_COUNT=0
+    TOTAL=0
+    READY=0
+    SIDECAR=0
 
-    for POD in $(echo "$PODS" | awk '{print $1}'); do
-      CONTAINERS=$(oc get pod "$POD" -n "${NS}" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null)
+    for pod in "${MATCHING_PODS[@]}"; do
+      ((TOTAL++))
+
+      # Check if all containers in the pod are Ready
+      READY_CONTAINERS=$(oc get pod "$pod" -n "${NS}" -o jsonpath='{.status.containerStatuses[*].ready}' 2>/dev/null || echo "")
+      if echo "$READY_CONTAINERS" | grep -q "true"; then
+        ((READY++))
+      fi
+
+      # Check for istio-proxy container
+      CONTAINERS=$(oc get pod "$pod" -n "${NS}" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null || echo "")
       if echo "$CONTAINERS" | grep -q "istio-proxy"; then
-        SIDECAR_COUNT=$((SIDECAR_COUNT + 1))
+        ((SIDECAR++))
       fi
     done
 
-    echo "📊 $deploy: Total=$TOTAL, Ready=$READY, Sidecars=$SIDECAR_COUNT"
+    echo "📊 $deploy: Total=$TOTAL, Ready=$READY, Sidecars=$SIDECAR"
 
-    if [[ "$TOTAL" -gt 0 && "$TOTAL" -eq "$READY" && "$TOTAL" -eq "$SIDECAR_COUNT" ]]; then
+    if [[ "$TOTAL" -gt 0 && "$TOTAL" -eq "$READY" && "$TOTAL" -eq "$SIDECAR" ]]; then
       echo "✅ ${deploy} is fully rolled out with sidecars."
       break
     else
       echo "🔄 Restarting rollout for ${deploy} in ${NS}..."
-      # Optionally use patch instead of rollout restart:
       oc patch deployment "${deploy}" -n "${NS}" \
         -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"sidecar.istio.io/inject-ts\":\"$(date +%s)\"}}}}}" || true
       sleep 15
