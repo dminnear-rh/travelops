@@ -86,15 +86,17 @@ proxy.istio.io/config: |
 #!/bin/bash
 
 NS="travel-portal"
+DEPLOYMENTS=("travels" "travels-v1" "voyages" "voyages-v1" "viaggi" "viaggi-v1")
 
-for app in travels voyages viaggi; do
-  echo "🔍 Checking rollout status for ${app} in namespace ${NS}..."
+for deploy in "${DEPLOYMENTS[@]}"; do
+  echo "🔍 Checking rollout status for ${deploy} in namespace ${NS}..."
 
   while true; do
-    PODS=$(oc get pods -n "${NS}" -l app="${app}" --no-headers 2>/dev/null)
+    # Only include pods owned by the specific deployment
+    PODS=$(oc get pods -n "${NS}" --no-headers | grep "${deploy}" || true)
 
     if [[ -z "$PODS" ]]; then
-      echo "❗ No pods found for app=${app}. Waiting..."
+      echo "❗ No pods found for ${deploy}. Waiting..."
       sleep 10
       continue
     fi
@@ -110,18 +112,18 @@ for app in travels voyages viaggi; do
       fi
     done
 
-    echo "📊 Total=$TOTAL, Ready=$READY, Sidecars=$SIDECAR_COUNT"
+    echo "📊 $deploy: Total=$TOTAL, Ready=$READY, Sidecars=$SIDECAR_COUNT"
 
     if [[ "$TOTAL" -gt 0 && "$TOTAL" -eq "$READY" && "$TOTAL" -eq "$SIDECAR_COUNT" ]]; then
-      echo "✅ ${app} is fully rolled out with sidecars."
+      echo "✅ ${deploy} is fully rolled out with sidecars."
       break
     else
-      echo "🔄 Restarting rollout for ${app} in ${NS}..."
-      oc rollout restart deploy -l app="${app}" -n "${NS}" || true
+      echo "🔄 Restarting rollout for ${deploy} in ${NS}..."
+      oc rollout restart deployment "${deploy}" -n "${NS}" || true
       sleep 15
     fi
   done
 done
 
-echo "🎉 All apps in ${NS} are now injected and ready!"
+echo "🎉 All deployments in ${NS} are now injected and ready!"
 {{- end }}
