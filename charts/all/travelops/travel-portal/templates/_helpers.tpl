@@ -90,26 +90,32 @@ set -euo pipefail
 NS="travel-portal"
 
 for app in travels voyages viaggi; do
-  echo "Checking rollout status for ${app} in namespace ${NS}..."
+  echo "🔍 Checking rollout status for ${app} in namespace ${NS}..."
 
   while true; do
-    ALL_PODS=$(oc get pods -n ${NS} -l app=${app} --field-selector=status.phase=Running --no-headers | wc -l)
-    READY_PODS=$(oc get pods -n ${NS} -l app=${app} --no-headers | awk '$2 == $2' | awk '{print $2}' | grep -c '^1/1\|2/2$')
+    PODS=$(oc get pods -n "${NS}" -l app="${app}" --no-headers)
 
-    # Optional: Check for presence of sidecar container
-    SIDECARS_PRESENT=$(oc get pods -n ${NS} -l app=${app} -o json | jq '[.items[] | .spec.containers[].name | select(. == "istio-proxy")]' | wc -l)
+    TOTAL=$(echo "$PODS" | wc -l)
+    READY=$(echo "$PODS" | awk '$2 == $2' | grep -E '1/1|2/2' | wc -l)
+    SIDECAR_COUNT=0
 
-    if [[ "${ALL_PODS}" -gt 0 && "${ALL_PODS}" -eq "${READY_PODS}" && "${SIDECARS_PRESENT}" -ge "${ALL_PODS}" ]]; then
+    # Count pods with the istio-proxy container (no jq version)
+    for POD in $(echo "$PODS" | awk '{print $1}'); do
+      if oc get pod "$POD" -n "${NS}" -o jsonpath='{.spec.containers[*].name}' | grep -q "istio-proxy"; then
+        ((SIDECAR_COUNT++))
+      fi
+    done
+
+    if [[ "$TOTAL" -gt 0 && "$TOTAL" -eq "$READY" && "$TOTAL" -eq "$SIDECAR_COUNT" ]]; then
       echo "✅ ${app} is fully rolled out with sidecars."
       break
     else
-      echo "🔄 Waiting for ${app} to be fully ready with sidecars..."
-      echo "Restarting rollout for ${app} in ${NS}..."
-      oc rollout restart deploy -l app=${app} -n ${NS}
+      echo "🔄 Restarting rollout for ${app} in ${NS}..."
+      oc rollout restart deploy -l app="${app}" -n "${NS}"
       sleep 15
     fi
   done
 done
 
-echo "🎉 All apps in travel-portal are now injected and ready!"
+echo "🎉 All apps in ${NS} are now injected and ready!"
 {{- end }}
