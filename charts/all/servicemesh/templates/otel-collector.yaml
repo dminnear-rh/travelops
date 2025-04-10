@@ -27,7 +27,7 @@ spec:
       otlp:
         auth:
           authenticator: bearertokenauth
-        endpoint: tempo-simplest-gateway.tempo.svc.cluster.local:8090
+        endpoint: tempo-simplest-gateway.istio-system.svc.cluster.local:8090
         headers:
           X-Scope-OrgID: dev
         tls:

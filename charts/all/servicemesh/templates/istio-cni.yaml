@@ -4,5 +4,4 @@ metadata:
   name: default
 spec:
   version: v1.24.3
-  profile: openshift-ambient
   namespace: istio-system
