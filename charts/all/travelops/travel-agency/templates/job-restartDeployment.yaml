@@ -7,6 +7,9 @@ metadata:
   namespace: travel-agency
 spec:
   template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       containers:
       - image: {{ .Values.job.image }}
