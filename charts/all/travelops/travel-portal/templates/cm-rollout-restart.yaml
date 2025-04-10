@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: rollout-restart
   namespace: travel-portal
+  annotations:
+    sidecar.istio.io/inject: false
 data:
   rollout-restart.sh: |
 {{- include "travel-portal.rolloutRestart" . | indent 4 }}
