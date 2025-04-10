@@ -85,20 +85,43 @@ proxy.istio.io/config: |
 {{- define "travel-portal.rolloutRestart" }}
 #!/bin/bash
 
-RUNNING=2
-for apps in travels voyages viaggi;  do
-    NS=travel-portal
-    COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
-  while [[ ${COUNT} != 2 ]]; do
-    sleep 5
-    echo "restarting deployment rollout for ${apps} in ${NS}"
-    echo "Running: kubectl rollout restart deploy -l app=${apps} -n ${NS}"
-    kubectl rollout restart deploy -l app=${apps} -n ${NS}
-    sleep 15
-    COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
-    done
-    echo "done"
+NS="travel-portal"
 
-  echo "All Set, no restart required in ${NS}"
+for app in travels voyages viaggi; do
+  echo "🔍 Checking rollout status for ${app} in namespace ${NS}..."
+
+  while true; do
+    PODS=$(oc get pods -n "${NS}" -l app="${app}" --no-headers 2>/dev/null)
+
+    if [[ -z "$PODS" ]]; then
+      echo "❗ No pods found for app=${app}. Waiting..."
+      sleep 10
+      continue
+    fi
+
+    TOTAL=$(echo "$PODS" | wc -l)
+    READY=$(echo "$PODS" | awk '$2 == $2' | grep -E '1/1|2/2' | wc -l)
+    SIDECAR_COUNT=0
+
+    for POD in $(echo "$PODS" | awk '{print $1}'); do
+      CONTAINERS=$(oc get pod "$POD" -n "${NS}" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null)
+      if echo "$CONTAINERS" | grep -q "istio-proxy"; then
+        SIDECAR_COUNT=$((SIDECAR_COUNT + 1))
+      fi
+    done
+
+    echo "📊 Total=$TOTAL, Ready=$READY, Sidecars=$SIDECAR_COUNT"
+
+    if [[ "$TOTAL" -gt 0 && "$TOTAL" -eq "$READY" && "$TOTAL" -eq "$SIDECAR_COUNT" ]]; then
+      echo "✅ ${app} is fully rolled out with sidecars."
+      break
+    else
+      echo "🔄 Restarting rollout for ${app} in ${NS}..."
+      oc rollout restart deploy -l app="${app}" -n "${NS}" || true
+      sleep 15
+    fi
+  done
 done
+
+echo "🎉 All apps in ${NS} are now injected and ready!"
 {{- end }}
