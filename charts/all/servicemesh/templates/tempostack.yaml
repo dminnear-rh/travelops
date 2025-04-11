@@ -8,11 +8,11 @@ spec:
     secret:
       name: tempostack-dev-minio
       type: s3
-  storageSize: 1Gi
+  storageSize: 10Gi
   resources:
     total:
       limits:
-        memory: 6Gi
+        memory: 16Gi
         cpu: "3"
   tenants:
     mode: openshift
