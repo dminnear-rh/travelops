@@ -12,8 +12,8 @@ spec:
   resources:
     total:
       limits:
-        memory: 2Gi
-        cpu: "2"
+        memory: 6Gi
+        cpu: "3"
   tenants:
     mode: openshift
     authentication:
@@ -27,13 +27,6 @@ spec:
     queryFrontend:
       jaegerQuery:
         enabled: true
-      resources:
-        limits:
-          cpu: 250m
-          memory: 512Mi
-        requests:
-          cpu: 100m
-          memory: 256Mi
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
