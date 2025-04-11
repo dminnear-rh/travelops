@@ -1,0 +1,14 @@
+apiVersion: sailoperator.io/v1
+kind: Istio
+metadata:
+  name: {{ include "servicemesh-base.fullname" . }}
+spec:
+  version: {{ .Values.servicemesh.version | quote }}
+  {{- if .Values.servicemesh.profile }}
+  profile: {{ .Values.servicemesh.profile }}
+  {{- end }}
+  namespace: {{ .Values.servicemesh.istio.namespace | quote }}
+  {{- if .Values.servicemesh.istio.values }}
+  values:
+{{ toYaml .Values.servicemesh.istio.values | indent 4 }}
+  {{- end }}

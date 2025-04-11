@@ -244,3 +244,33 @@ clusterGroup:
 #          operator: In
 #          values:
 #            - OpenShift
+servicemesh:
+  istio:
+    values:
+      meshConfig:
+        enableTracing: true
+        extensionProviders:
+          - name: zipkin
+            zipkin:
+              service: dev-collector.istio-system.svc.cluster.local
+              port: 9411
+        defaultProviders:
+          tracing:
+            - zipkin
+        discoverySelectors:
+          - matchLabels:
+              istio-discovery: enabled
+
+  peerauthentications:
+    - name: default
+      namespace: istio-system
+      spec:
+        mtls:
+          mode: STRICT
+
+  monitoring:
+    enabled: true
+    podMonitorNamespaces:
+      - travel-agency
+      - travel-portal
+      - travel-control

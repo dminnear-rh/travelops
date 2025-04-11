@@ -1,0 +1,16 @@
+{{- if .Values.servicemesh.ztunnel.enabled }}
+apiVersion: sailoperator.io/v1alpha1
+kind: ZTunnel
+metadata:
+  name: {{ include "servicemesh-base.fullname" . }}
+spec:
+  version: {{ .Values.servicemesh.version | quote }}
+  namespace: {{ .Values.servicemesh.ztunnel.namespace | default .Values.servicemesh.istio.namespace | quote }}
+  {{- if .Values.servicemesh.profile }}
+  profile: {{ .Values.servicemesh.profile | quote }}
+  {{- end }}
+  {{- if .Values.servicemesh.ztunnel.values }}
+  values:
+{{ toYaml .Values.servicemesh.ztunnel.values | indent 4 }}
+  {{- end }}
+{{- end }}

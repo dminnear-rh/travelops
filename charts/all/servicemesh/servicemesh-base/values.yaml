@@ -1,0 +1,30 @@
+servicemesh:
+  version: v1.24.3
+  profile: "" # not rendered if empty
+
+  istio:
+    namespace: istio-system
+    values: {}
+
+  istiocni:
+    namespace: "" # defaults to istio.namespace
+    values: {}
+
+  ztunnel:
+    enabled: false
+    namespace: "" # defaults to istio.namespace
+    values: {}
+
+  peerauthentications: []
+    # - name: default
+    #   namespace: istio-system
+    #   spec:
+    #     mtls:
+    #       mode: STRICT
+
+  monitoring:
+    enabled: true
+
+    # Namespaces to create istio-proxy PodMonitors in
+    podMonitorNamespaces:
+      - istio-system

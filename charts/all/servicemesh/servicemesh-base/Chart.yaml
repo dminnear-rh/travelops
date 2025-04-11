@@ -1,0 +1,9 @@
+apiVersion: v2
+name: servicemesh-base
+description: >
+  Helm chart for deploying a fully functional Red Hat OpenShift Service Mesh 3.0
+  base setup, including support for sidecar and ambient modes, and monitoring integration.
+
+type: application
+version: 0.1.0
+appVersion: "3.0.0"

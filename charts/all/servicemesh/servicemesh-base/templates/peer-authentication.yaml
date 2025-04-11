@@ -1,0 +1,10 @@
+{{- range .Values.servicemesh.peerauthentications }}
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: {{ .name | quote }}
+  namespace: {{ .namespace | quote }}
+spec:
+{{ toYaml .spec | indent 2 }}
+---
+{{- end }}
