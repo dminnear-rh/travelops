@@ -83,8 +83,6 @@ proxy.istio.io/config: |
       http.header.travel:
         header:
           name: travel
-    propagation:
-      - B3
 {{- end }}
 
 {{- define "travel-portal.rolloutRestart" }}

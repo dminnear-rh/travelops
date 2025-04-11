@@ -6,23 +6,8 @@ metadata:
 spec:
   tracing:
     - providers:
-        - name: otel
+        - name: zipkin
       randomSamplingPercentage: 100
-      customTags:
-        http.header.portal:
-          header:
-            name: portal
-        http.header.device:
-          header:
-            name: device
-        http.header.user:
-          header:
-            name: user
-        http.header.travel:
-          header:
-            name: travel
-      propagation:
-        - B3
   metrics:
     - providers:
         - name: prometheus

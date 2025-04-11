@@ -9,13 +9,13 @@ spec:
     meshConfig:
       enableTracing: true
       extensionProviders:
-      - name: otel
-        opentelemetry:
-          port: 4317
-          service: dev-collector.istio-system.svc.cluster.local
+        - name: zipkin
+          zipkin:
+            service: dev-collector.istio-system.svc.cluster.local
+            port: 9411
       defaultProviders:
         tracing:
-          - otel
+          - zipkin
       discoverySelectors:
         - matchLabels:
             istio-discovery: enabled
