@@ -17,6 +17,8 @@ spec:
   replicas: {{ $.Values.replicaCount }}
   template:
     metadata:
+      annotations:
+      {{- include "travel-portal.istioProxyConfig" . | nindent 8 }}
       labels:
         app: {{ $apps.name }}
         version: {{ $version }}

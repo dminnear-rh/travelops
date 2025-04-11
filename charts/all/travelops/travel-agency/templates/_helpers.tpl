@@ -43,6 +43,30 @@ Selector labels
 {{- define "travel-agency.selectorLabels" -}}
 {{- end }}
 
+{{/*
+Proxy config for istio (indent 8)
+*/}}
+{{- define "travel-agency.istioProxyConfig" -}}
+proxy.istio.io/config: |
+  tracing:
+    opentelemetry:
+      address: dev-collector.istio-system.svc.cluster.local:4317
+    sampling: 100
+    custom_tags:
+      http.header.portal:
+        header:
+          name: portal
+      http.header.device:
+        header:
+          name: device
+      http.header.user:
+        header:
+          name: user
+      http.header.travel:
+        header:
+          name: travel
+{{- end }}
+
 {{- define "travel-agency.mysqlEnv" -}}
 - name: MYSQL_USER
   value: "root"

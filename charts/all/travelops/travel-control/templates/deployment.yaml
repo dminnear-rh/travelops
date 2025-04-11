@@ -14,6 +14,8 @@ spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
+      annotations:
+      {{- include "travel-control.istioProxyConfig" . | nindent 8 }}
       labels:
         app: control
         version: {{ .Values.appVersion }}
