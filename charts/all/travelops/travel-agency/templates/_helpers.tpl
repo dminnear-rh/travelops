@@ -43,30 +43,6 @@ Selector labels
 {{- define "travel-agency.selectorLabels" -}}
 {{- end }}
 
-{{/*
-Proxy config for istio (indent 8)
-*/}}
-{{- define "travel-agency.istioProxyConfig" -}}
-proxy.istio.io/config: |
-  tracing:
-    zipkin:
-      address: zipkin.istio-system:9411
-    sampling: 10
-    custom_tags:
-      http.header.portal:
-        header:
-          name: portal
-      http.header.device:
-        header:
-          name: device
-      http.header.user:
-        header:
-          name: user
-      http.header.travel:
-        header:
-          name: travel
-{{- end }}
-
 {{- define "travel-agency.mysqlEnv" -}}
 - name: MYSQL_USER
   value: "root"

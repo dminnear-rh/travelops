@@ -12,15 +12,15 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       containers:
-        - image: {{ .Values.job.image }}
+      - image: {{ .Values.job.image }}
+        name: rollout-restart
+        command:
+          - /bin/bash
+          - '/usr/local/bin/rollout-restart.sh'
+        volumeMounts:
+        - mountPath: /usr/local/bin/rollout-restart.sh
           name: rollout-restart
-          command:
-            - /bin/bash
-            - '/usr/local/bin/rollout-restart.sh'
-          volumeMounts:
-            - mountPath: /usr/local/bin/rollout-restart.sh
-              name: rollout-restart
-              subPath: rollout-restart.sh
+          subPath: rollout-restart.sh
       volumes:
         - name: rollout-restart
           configMap:

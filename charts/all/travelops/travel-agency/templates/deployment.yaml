@@ -16,17 +16,6 @@ spec:
   replicas: {{ $.Values.replicaCount }}
   template:
     metadata:
-      annotations:
-        readiness.status.sidecar.istio.io/applicationPorts: ""
-      {{- if $.Values.sidecarAutoInjection }}
-        sidecar.istio.io/inject: "true"
-      {{- end }}
-      {{- if $.Values.sidecarJaeger }}
-        sidecar.jaegertracing.io/inject: "jaeger-{{ $.Values.global.jaeger.strategy }}"
-      {{- end }}
-      {{- if ne $apps.name "insurances" }}
-      {{- include "travel-agency.istioProxyConfig" . | nindent 8 }}
-      {{- end }}
       labels:
         app: {{ $apps.name }}
         version: {{ $version }}

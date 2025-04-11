@@ -2,17 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Global parameters for the jaeger resource
-global:
-  jaeger:
-    strategy: production
-
-# Enable Auto sidecar injection for travel apps
-sidecarAutoInjection: false
-
-# Enable jaeger sidecar
-sidecarJaeger: false
-
 replicaCount: 1
 
 image:

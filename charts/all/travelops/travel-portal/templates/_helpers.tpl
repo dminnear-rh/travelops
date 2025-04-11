@@ -61,83 +61,23 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
-{{- define "travel-portal.istioProxyConfig" -}}
-proxy.istio.io/config: |
-  tracing:
-    zipkin:
-      address: zipkin.istio-system:9411
-    sampling: 10
-    custom_tags:
-      http.header.portal:
-        header:
-          name: portal
-      http.header.device:
-        header:
-          name: device
-      http.header.user:
-        header:
-          name: user
-      http.header.travel:
-        header:
-          name: travel
-{{- end}}
-
 {{- define "travel-portal.rolloutRestart" }}
 #!/bin/bash
 
-NS="travel-portal"
-DEPLOYMENTS=("travels" "travels-v1" "voyages" "voyages-v1" "viaggi" "viaggi-v1")
-
-echo "🔄 Restarting all deployments to trigger sidecar injection..."
-
-for deploy in "${DEPLOYMENTS[@]}"; do
-  oc rollout restart deployment "$deploy" -n "$NS"
-done
-
-echo "⏳ Waiting for pods to be ready and injected..."
-
-for deploy in "${DEPLOYMENTS[@]}"; do
-  echo "🔍 Verifying rollout and injection for $deploy..."
-
-  while true; do
-    PODS=$(oc get pods -n "$NS" -l app="${deploy%%-v1}" --no-headers | grep "$deploy" || true)
-
-    if [[ -z "$PODS" ]]; then
-      echo "❗ No pods found for $deploy yet. Waiting..."
-      sleep 10
-      continue
-    fi
-
-    TOTAL=0
-    READY=0
-    SIDECAR=0
-
-    for pod in $(echo "$PODS" | awk '{print $1}'); do
-      ((TOTAL++))
-
-      # Check Ready
-      READY_CONTAINERS=$(oc get pod "$pod" -n "$NS" -o jsonpath='{.status.containerStatuses[*].ready}' 2>/dev/null || echo "")
-      if echo "$READY_CONTAINERS" | grep -q "true"; then
-        ((READY++))
-      fi
-
-      # Check istio-proxy
-      CONTAINERS=$(oc get pod "$pod" -n "$NS" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null || echo "")
-      if echo "$CONTAINERS" | grep -q "istio-proxy"; then
-        ((SIDECAR++))
-      fi
+RUNNING=2
+for apps in travels voyages viaggi;  do
+    NS=travel-portal
+    COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
+  while [[ ${COUNT} != 2 ]]; do
+    sleep 5
+    echo "restarting deployment rollout for ${apps} in ${NS}"
+    echo "Running: kubectl rollout restart deploy -l app=${apps} -n ${NS}"
+    kubectl rollout restart deploy -l app=${apps} -n ${NS}
+    sleep 15
+    COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
     done
+    echo "done"
 
-    echo "📊 $deploy: Total=$TOTAL, Ready=$READY, Sidecars=$SIDECAR"
-
-    if [[ "$TOTAL" -gt 0 && "$TOTAL" -eq "$READY" && "$TOTAL" -eq "$SIDECAR" ]]; then
-      echo "✅ $deploy is fully rolled out with sidecars."
-      break
-    fi
-
-    sleep 10
-  done
+  echo "All Set, no restart required in ${NS}"
 done
-
-echo "🎉 All deployments restarted and verified with sidecar injection!"
 {{- end }}

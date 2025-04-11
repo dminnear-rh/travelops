@@ -14,14 +14,6 @@ spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
-      annotations:
-        readiness.status.sidecar.istio.io/applicationPorts: ""
-        {{- if .Values.sidecarAutoInjection }}
-        sidecar.istio.io/inject: "true"
-        {{- end }}
-        {{- if .Values.sidecarJaeger }}
-        sidecar.jaegertracing.io/inject: "jaeger-{{ .Values.global.jaeger.strategy }}"
-        {{- end }}
       labels:
         app: control
         version: {{ .Values.appVersion }}
@@ -44,4 +36,3 @@ spec:
           env:
             - name: PORTAL_SERVICES
               value: "voyages.fr;http://voyages.travel-portal:8000,viaggi.it;http://viaggi.travel-portal:8000,travels.uk;http://travels.travel-portal:8000"
-

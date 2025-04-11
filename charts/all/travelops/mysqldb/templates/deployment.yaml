@@ -11,14 +11,6 @@ spec:
     {{- include "mysqldb.labels" . | nindent 6 }}
   template:
     metadata:
-      annotations:
-        readiness.status.sidecar.istio.io/applicationPorts: ""
-      {{- if .Values.sidecarAutoInjection }}
-        sidecar.istio.io/inject: "true"
-      {{- end }}
-      {{- if .Values.sidecarJaeger }}
-        sidecar.jaegertracing.io/inject: "jaeger-{{ .Values.global.jaeger.strategy }}"
-      {{- end }}
       labels:
       {{- include "mysqldb.labels" . | nindent 8 }}
     spec:
