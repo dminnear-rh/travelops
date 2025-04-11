@@ -22,6 +22,8 @@ spec:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
+      zipkin:
+        endpoint: 0.0.0.0:9411
     exporters:
       debug: null
       otlp:
@@ -50,6 +52,7 @@ spec:
           receivers:
             - otlp
             - jaeger
+            - zipkin
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

@@ -67,8 +67,8 @@ Proxy config for istio (indent 8)
 {{- define "travel-control.istioProxyConfig" -}}
 proxy.istio.io/config: |
   tracing:
-    opentelemetry:
-      address: dev-collector.istio-system.svc.cluster.local:4317
+    zipkin:
+      address: dev-collector.istio-system.svc.cluster.local:9411
     sampling: 100
     custom_tags:
       http.header.portal:
