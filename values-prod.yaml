@@ -76,7 +76,7 @@ clusterGroup:
       chartVersion: main
 
 servicemesh:
-  values: ambient
+  profile: ambient
 
   istio:
     values:
