@@ -78,6 +78,10 @@ clusterGroup:
 servicemesh:
   values: ambient
 
+  istio:
+    values:
+      trustedZtunnelNamespace: istio-system
+
   ztunnel:
     enabled: true
 
