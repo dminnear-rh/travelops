@@ -7,35 +7,14 @@ clusterGroup:
     - golang-external-secrets
     - travel-agency:
         labels:
-          istio-discovery: enabled
-          istio.io/rev: default
+          istio.io/dataplane-mode: ambient
     - travel-portal:
         labels:
-          istio-discovery: enabled
-          istio.io/rev: default
+          istio.io/dataplane-mode: ambient
     - travel-control:
         labels:
-          istio-discovery: enabled
-          istio.io/rev: default
-    - istio-system:
-        labels:
-          istio-discovery: enabled
-    - tempo:
-        labels:
-          istio-discovery: enabled
-    - openshift-tempo-operator:
-        labels:
-          openshift.io/cluster-monitoring: true
-        operatorGroup: true
-        targetNamespaces:
-    - openshift-opentelemetry-operator:
-        operatorGroup: true
-        targetNamespaces:
-    - openshift-cluster-observability-operator:
-        labels:
-          openshift.io/cluster-monitoring: true
-        operatorGroup: true
-        targetNamespaces:
+          istio.io/dataplane-mode: ambient
+    - istio-system
 
   subscriptions:
     servicemesh:
@@ -44,23 +23,10 @@ clusterGroup:
     servicemesh-console:
       name: kiali-ossm
 
-    distributed-tracing:
-      name: tempo-product
-      namespace: openshift-tempo-operator
-
-    opentelemetry:
-      name: opentelemetry-product
-      namespace: openshift-opentelemetry-operator
-
-    cluster-observability:
-      name: cluster-observability-operator
-      namespace: openshift-cluster-observability-operator
-
   projects:
     - hub
     - servicemesh
     - travelops
-    - distributed-tracing
 
   applications:
     vault:
@@ -105,141 +71,16 @@ clusterGroup:
       name: servicemesh
       namespace: istio-system
       project: servicemesh
-      path: charts/all/servicemesh
-
-    temposttack:
-      name: tempostack
-      namespace: tempo
-      project: distributed-tracing
-      path: charts/all/tempostack
-
-    tracing:
-      name: distributed-tracing
-      namespace: istio-system
-      project: distributed-tracing
-      path: charts/all/distributed-tracing
+      path: .
+      repoURL: https://github.com/validatedpatterns/servicemesh3-chart
+      chartVersion: main
 
 servicemesh:
-  istio:
-    values:
-      meshConfig:
-        enableTracing: true
-        extensionProviders:
-          - name: zipkin
-            zipkin:
-              service: dev-collector.istio-system.svc.cluster.local
-              port: 9411
-        defaultProviders:
-          tracing:
-            - zipkin
-        discoverySelectors:
-          - matchLabels:
-              istio-discovery: enabled
+  values: ambient
 
-  peerauthentications:
-    - name: default
-      namespace: istio-system
-      spec:
-        mtls:
-          mode: STRICT
+  ztunnel:
+    enabled: true
 
   monitoring:
-    enabled: true
     podMonitorNamespaces:
-      - travel-agency
-      - travel-portal
-      - travel-control
-
-tempostack:
-  namespace: tempo
-
-  storage:
-    secretName: tempostack-dev-minio
-
-  resources:
-    limits:
-      memory: 16Gi
-      cpu: "6"
-
-  tenants:
-    authentication:
-      - tenantName: dev
-        tenantId: ec68da6d-6e32-410d-9f76-07d815ab865a
-
-  template:
-    gateway:
-      enabled: true
-    queryFrontend:
-      jaegerQuery:
-        enabled: true
-
-  rbac:
-    reader:
-      resourceNames:
-        - traces
-
-tracing:
-  telemetries:
-    - name: mesh-default
-      namespace: istio-system
-      spec:
-        tracing:
-          - providers:
-              - name: zipkin
-            randomSamplingPercentage: 100
-        metrics:
-          - providers:
-              - name: prometheus
-
-  collectors:
-    - name: dev
-      namespace: istio-system
-      config: |
-        receivers:
-          jaeger:
-            protocols:
-              grpc:
-                endpoint: 0.0.0.0:14250
-              thrift_binary:
-                endpoint: 0.0.0.0:6832
-              thrift_compact:
-                endpoint: 0.0.0.0:6831
-              thrift_http:
-                endpoint: 0.0.0.0:14268
-          otlp:
-            protocols:
-              grpc:
-                endpoint: 0.0.0.0:4317
-              http:
-                endpoint: 0.0.0.0:4318
-          zipkin:
-            endpoint: 0.0.0.0:9411
-        exporters:
-          debug: null
-          otlp:
-            auth:
-              authenticator: bearertokenauth
-            endpoint: tempo-tempostack-gateway.tempo.svc.cluster.local:8090
-            headers:
-              X-Scope-OrgID: dev
-            tls:
-              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
-              insecure: false
-        extensions:
-          bearertokenauth:
-            filename: /var/run/secrets/kubernetes.io/serviceaccount/token
-        service:
-          extensions:
-            - bearertokenauth
-          telemetry:
-            metrics:
-              address: 0.0.0.0:8888
-          pipelines:
-            traces:
-              exporters:
-                - otlp
-                - debug
-              receivers:
-                - otlp
-                - jaeger
-                - zipkin
+      - istio-system

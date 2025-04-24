@@ -1,9 +1,0 @@
-{{- if .Values.servicemesh.console.enabled }}
-apiVersion: kiali.io/v1alpha1
-kind: OSSMConsole
-metadata:
-  name: {{ .Values.servicemesh.ossmc.name | quote }}
-  namespace: openshift-operators
-spec:
-{{ toYaml .Values.servicemesh.ossmc.spec | indent 2 }}
-{{- end }}
