@@ -12,27 +12,11 @@ permissions:
   contents: read
 
 jobs:
-  get-token:
-    runs-on: ubuntu-latest
-    permissions: {}
-    outputs:
-      generated_token: ${{ steps.app-token.outputs.token }}
-    steps:
-      - name: Generate Token
-        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
-        id: app-token
-        with:
-          app-id: ${{ vars.METADATA_SYNC_APP_ID }}
-          private-key: ${{ secrets.METADATA_SYNC_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: "docs"
-
   update-metadata:
-    needs: get-token
     uses: validatedpatterns/docs/.github/workflows/metadata-docs.yml@main # zizmor: ignore[unpinned-uses]
     permissions:
       contents: read
       packages: write
       id-token: write
     secrets:
-      DOCS_TOKEN: ${{ needs.get-token.outputs.generated_token }}
+      METADATA_SYNC_PRIVATE_KEY: ${{ secrets.METADATA_SYNC_PRIVATE_KEY }}
