@@ -1,6 +1,6 @@
 # TravelOps Test Plan
 
-[GitHub Repository](https://github.com/validatedpatterns-sandbox/travelops)
+[GitHub Repository](https://github.com/validatedpatterns/travelops)
 
 ## PreRequisites
 
