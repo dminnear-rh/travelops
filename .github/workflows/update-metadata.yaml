@@ -24,6 +24,8 @@ jobs:
         with:
           app-id: ${{ vars.METADATA_SYNC_APP_ID }}
           private-key: ${{ secrets.METADATA_SYNC_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: "docs"
 
   update-metadata:
     needs: get-token
