@@ -5,9 +5,9 @@ name: travelops
 description: A pattern deploying a demo travel-booking stack on OpenShift with Service Mesh (Istio), mTLS, distributed tracing, and observability
 pattern_version: "1.0"
 display_name: TravelOps
-repo_url: https://github.com/validatedpatterns-sandbox/travelops
+repo_url: https://github.com/validatedpatterns/travelops
 docs_repo_url: https://github.com/validatedpatterns/docs
-issues_url: https://github.com/validatedpatterns-sandbox/travelops/issues
+issues_url: https://github.com/validatedpatterns/travelops/issues
 docs_url: https://validatedpatterns.io/patterns/travelops/
 ci_url: https://validatedpatterns.io/ci/?pattern=travelops
 # can be sandbox, tested or maintained
