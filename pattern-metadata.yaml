@@ -12,7 +12,7 @@ docs_url: https://validatedpatterns.io/patterns/travelops/
 ci_url: https://validatedpatterns.io/ci/?pattern=travelops
 # can be sandbox, tested or maintained
 tier: tested
-owners: mbaldessari, day0hero
+owners: dminnear-rh, day0hero
 requirements:
   hub:
     compute:
