@@ -3,14 +3,13 @@
 # validatedpatterns/docs/.github/workflows/metadata-docs.yml@main
 ---
 name: Update docs pattern metadata
-
 on:
   push:
     paths:
       - "pattern-metadata.yaml"
       - ".github/workflows/update-metadata.yml"
-
-permissions: read-all
+    branches:
+      - main
 
 jobs:
   update-metadata:
@@ -19,7 +18,8 @@ jobs:
       contents: read  # Required for "read-all"
       packages: write # Allows writing to packages
       id-token: write # Allows creating OpenID Connect (OIDC) tokens
-    secrets: inherit # zizmor: ignore[secrets-inherit]
+    secrets:
+      DOCS_TOKEN: ${{ secrets.DOCS_TOKEN }}
     # For testing you can point to a different branch in the docs repository
     # with:
     #  DOCS_BRANCH: "main"
