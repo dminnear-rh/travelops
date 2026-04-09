@@ -4,6 +4,7 @@
 ---
 name: Update docs pattern metadata
 on:
+  workflow_dispatch:
   push:
     paths:
       - "pattern-metadata.yaml"
